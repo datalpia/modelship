@@ -2,6 +2,14 @@
 
 > Ship machine learning models in minutes, not months
 
+[![PyPI](https://img.shields.io/pypi/v/modelship.svg)](https://pypi.org/project/modelship/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/modelship?logo=python&logoColor=white)](https://pypi.org/project/modelship/)
+[![CI/CD](https://github.com/datalpia/modelship/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/datalpia/modelship/actions/workflows/ci-cd.yml)
+[![License](https://img.shields.io/github/license/datalpia/modelship)](https://github.com/datalpia/modelship/blob/main/LICENSE)
+
+`modelship` is a utility application to ease wrapping and deploying machine learning models
+by autogenerating applications, leveraging modern standards such as ONNX and WebAssembly.
+
 ## Demo
 
 Examples of static web applications generated with `modelship` from ONNX models:
