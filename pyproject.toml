@@ -1,0 +1,48 @@
+[project]
+name = "modelship"
+description = "Ship machine learning models in minutes, not months"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "jinja2>=3",
+    "onnxruntime>=1",
+    "pydantic>=2",
+    "pyyaml>=6",
+]
+keywords = ["machine-learning", "deployment", "webassembly", "onnx"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Other Audience",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+]
+dynamic = ["version"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "modelship/__about__.py"
+
+[dependency-groups]
+dev = [
+    "bandit==1.8.6",
+    "invoke==2.2.0",
+    "mypy==1.18.2",
+    "pip-audit==2.9.0",
+    "pytest==8.4.2",
+    "pytest-cov==7.0.0",
+    "ruff==0.13.1",
+    "types-pyyaml==6.0.12.20250915",
+]
