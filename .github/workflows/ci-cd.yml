@@ -228,3 +228,41 @@ jobs:
             --notes-file "${RELEASE_NOTES_MD_FILE}" \
             --verify-tag \
             dist/*
+
+  demo-deployment:
+    name: Demo Deployment
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: demo
+      url: https://datalpia.github.io/modelship/
+    if: github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+      - name: Build demo artifacts
+        run: |
+          uv run modelship static --output dist/demo/housing --metadata demo/housing/metadata.yml demo/housing/model.onnx
+          uv run modelship static --output dist/demo/sentiment --metadata demo/sentiment/metadata.yml demo/sentiment/model.onnx
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
