@@ -32,6 +32,9 @@ dynamic = ["version"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[project.scripts]
+modelship = "modelship.__main__:cli"
+
 [tool.hatch.version]
 path = "modelship/__about__.py"
 

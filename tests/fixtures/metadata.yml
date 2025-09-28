@@ -1,0 +1,34 @@
+name: Grenoble Housing Predictor
+description: Model to predict the price of a flat in Grenoble, France given some numeric features.
+inputs:
+  area:
+    name: Living area (m2)
+    type: float32
+    shape: [null, 1]
+    min: 10
+    max: 200
+    step: 1
+    default: 50
+  rooms:
+    name: Number of rooms
+    type: float32
+    shape: [null, 1]
+    min: 1
+    max: 10
+    step: 1
+    default: 3
+  latitude:
+    name: Latitude
+    type: float32
+    shape: [null, 1]
+    default: 45.1893525
+  longitude:
+    name: Longitude
+    type: float32
+    shape: [null, 1]
+    default: 5.7216074
+outputs:
+  variable:
+    name: Price (€)
+    type: float32
+    shape: [null, 1]
