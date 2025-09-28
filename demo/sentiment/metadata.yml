@@ -1,0 +1,13 @@
+name: Movie Review Sentiment Analysis
+description: Predict the positive or negative sentiment of a movie review text.
+inputs:
+  X:
+    name: Input text
+    type: string
+    shape: [null]
+    default: This movie is great!
+outputs:
+  label:
+    name: Label
+    type: string
+    shape: [null]
