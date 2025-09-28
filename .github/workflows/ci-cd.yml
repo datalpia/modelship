@@ -1,0 +1,230 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+      - name: Run QA
+        run: uv run inv qa
+      - name: Upload coverage artifacts
+        if: ${{ matrix.python-version == 3.13 }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: .coverage
+          include-hidden-files: true
+
+  coverage:
+    runs-on: ubuntu-latest
+    needs: ci
+    if: ${{ !cancelled() }}
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    env:
+      CODECOV_MD_FILE: "coverage.md"
+      CODECOV_REPORT_TITLE: "Code coverage report"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+      - uses: actions/download-artifact@v5
+        with:
+          name: coverage
+      - name: Generate Markdown code coverage report
+        run: |
+          echo "# ${CODECOV_REPORT_TITLE}" >> "${CODECOV_MD_FILE}"
+          uv run coverage report --show-missing --format=markdown >> "${CODECOV_MD_FILE}"
+      - name: Compute diff coverage with target branch
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          TARGET_BRANCH: origin/${{ github.event.pull_request.base.ref }}
+          DIFFCOV_MD_FILE: "diff-coverage.md"
+        run: |
+          uv run coverage xml
+          uv run --with diff_cover diff-cover --compare-branch ${TARGET_BRANCH} --diff-range-notation '..' --ignore-staged --ignore-unstaged --markdown-report "${DIFFCOV_MD_FILE}" coverage.xml
+          cat "${DIFFCOV_MD_FILE}" >> "${CODECOV_MD_FILE}"
+      - name: Export code coverage report to job summary
+        run: cat "${CODECOV_MD_FILE}" >> "${GITHUB_STEP_SUMMARY}"
+      - name: Add or update code coverage comment to pull request
+        uses: actions/github-script@v8
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          script: |
+            const fs = require('fs')
+
+            const body = fs.readFileSync(`${process.env.CODECOV_MD_FILE}`, 'utf-8')
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              }
+            )
+            const matches = comments.filter(
+              comment => comment.body && comment.body.includes(`${process.env.CODECOV_REPORT_TITLE}`)
+            )
+            const comment = matches[0]
+
+            if (comment) {
+              const commentId = comment.id.toString()
+              console.log(`updating existing comment comment_id=${commentId}`)
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: commentId,
+                body: body,
+              })
+            } else {
+              console.log('adding new comment')
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              })
+            }
+      - name: Check code coverage constraint
+        run: uv run coverage report --fail-under=100
+
+  build:
+    runs-on: ubuntu-latest
+    needs: ci
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+      - name: Build package
+        run: uv build
+      - name: Upload package build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: dist
+          include-hidden-files: true
+
+  test-pypi-publish:
+    name: Upload release to Test PyPI
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ contains(github.ref, 'main') || startsWith(github.head_ref, 'release/') }}
+    environment:
+      name: test-pypi
+      url: https://test.pypi.org/project/modelship/
+    permissions:
+      id-token: write
+    steps:
+      - name: Download package build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: dist/
+      - name: Publish package distributions to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+      # - name: Install uv
+      #   uses: astral-sh/setup-uv@v5
+      # - name: Validate package is available with uvx
+      #   run: uvx --index https://test.pypi.org/simple/ --index-strategy unsafe-best-match modelship --version
+
+  pypi-publish:
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ contains(github.ref, 'tags') }}
+    environment:
+      name: pypi
+      url: https://pypi.org/project/modelship/
+    permissions:
+      id-token: write
+    steps:
+      - name: Download package build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: dist/
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Validate package is available with uvx
+        run: uvx modelship --version
+
+  release-publish:
+    name: Publish release as GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ contains(github.ref, 'tags') }}
+    env:
+      TAG_NAME: "${{ github.ref_name }}"
+      RELEASE_NOTES_MD_FILE: "release_notes.md"
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Download package build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: dist/
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Extract changelog notes
+        run: |
+          uvx keepachangelog show ${TAG_NAME} >> "${RELEASE_NOTES_MD_FILE}"
+          cat "${RELEASE_NOTES_MD_FILE}" >> "${GITHUB_STEP_SUMMARY}"
+      - name: Create GitHub Release from changelog
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${TAG_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${TAG_NAME}" \
+            --notes-file "${RELEASE_NOTES_MD_FILE}" \
+            --verify-tag \
+            dist/*
