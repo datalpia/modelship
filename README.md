@@ -2,6 +2,17 @@
 
 > Ship machine learning models in minutes, not months
 
+## Demo
+
+Examples of static web applications generated with `modelship` from ONNX models:
+
+- `housing`: housing price prediction model (regression)
+    - Live: https://datalpia.github.io/modelship/demo/housing/
+    - Source: [demo/housing](demo/housing)
+- `sentiment`: movie review sentiment analysis (binary classification)
+    - Live: https://datalpia.github.io/modelship/demo/sentiment/
+    - Source: [demo/sentiment](demo/sentiment)
+
 ## Features
 
 - ONNX model support
