@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<header>
+  <title>{{ model_metadata.name }} | modelship</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+</header>
+
+<body>
+  <main class="container">
+    <h1>{{ model_metadata.name }}</h1>
+
+    {% if model_metadata.description %}
+    <p>{{ model_metadata.description }}</p>
+    {% endif %}
+
+    <h2>Inputs</h2>
+    <form id="inferenceForm">
+      {% for model_input_key, model_input in model_metadata.inputs.items() %}
+      <label for="{{ model_input_key }}Input">{{ model_input.name }}</label>
+      <input
+        id="{{ model_input_key }}Input"
+        type="{% if model_input.type == 'float32' %}number{% else %}text{% endif %}"
+        {% if model_input.min %}min="{{ model_input.min }}"{% endif %}
+        {% if model_input.max %}max="{{ model_input.max }}"{% endif %}
+        {% if model_input.step %}step="{{ model_input.step }}"{% endif %}
+        {% if model_input.default %}value="{{ model_input.default }}"{%endif %}
+      >
+      {% endfor %}
+      <input type="submit" value="Run">
+    </form>
+
+    <h2>Outputs</h2>
+    <form id="resultsForm">
+      {% for model_output_key, model_output in model_metadata.outputs.items() %}
+      <label for="{{ model_output_key }}Output">{{ model_output.name }}</label>
+      <input
+        id="{{ model_output_key }}Output"
+        type="{% if model_output.type == 'float32' %}number{% else %}text{% endif %}"
+        disabled
+      >
+      {% endfor %}
+    </form>
+  </main>
+
+  <script type="module">
+    import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js"
+    ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/"
+
+    const modelMetadata = {{ model_metadata_json | safe }}
+
+    console.info('loading model using onnx runtime web')
+    const session = await ort.InferenceSession.create('{{ model_path }}')
+
+    function getTensor(value, inputMetadata) {
+      const shape = inputMetadata.shape.map((item, index, arr) => item === null ? 1 : item)
+      const array = (inputMetadata.type === 'float32') ? Float32Array.from([value]) : [value]
+      return new ort.Tensor(inputMetadata.type, array, shape)
+    }
+
+    async function performModelInference(inputs) {
+      try {
+        const inputTensors = Object.fromEntries(
+          Object.entries(inputs).map(
+            ([key, value]) => [key, getTensor(value, modelMetadata.inputs[key])]
+          )
+        )
+
+        const results = await session.run(inputTensors)
+        console.debug(`'results': ${JSON.stringify(results, null, 4)}`)
+
+        return Object.fromEntries(
+          Object.entries(results).map(([key, value]) => [key, value.data])
+        )
+      } catch (e) {
+        console.error(`failed to inference ONNX model: ${e}.`)
+      }
+    }
+
+    function main() {
+      document.getElementById('inferenceForm').addEventListener('submit', async event => {
+        event.preventDefault()
+
+        const formInputs = {
+          {% for model_input_key, model_input in model_metadata.inputs.items() %}
+          {{ model_input_key }}: document.getElementById('{{ model_input_key}}Input').value,
+          {% endfor %}
+        }
+
+        console.debug(`performing model inference with inputs: ${JSON.stringify(formInputs, null, 4)}`)
+        const formOutputs = await performModelInference(formInputs)
+        console.debug(`output model predictions: ${JSON.stringify(formOutputs, null, 4)}`)
+
+        {% for model_output_key in model_metadata.outputs.keys() %}
+        document.getElementById('{{ model_output_key }}Output').value = formOutputs.{{ model_output_key }}
+        {% endfor %}
+      })
+    }
+
+    main()
+  </script>
+</body>
+
+</html>
