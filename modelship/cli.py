@@ -81,10 +81,16 @@ def cli() -> None:
         "static", help="Generate a static web application", add_help=True
     )
     static_parser.add_argument(
-        "--output", help="Output path for the static web application", type=Path, required=True,
+        "--output",
+        help="Output path for the static web application",
+        type=Path,
+        required=True,
     )
     static_parser.add_argument(
-        "--metadata", help="Model metadata path (YAML)", type=Path, required=True,
+        "--metadata",
+        help="Model metadata path (YAML)",
+        type=Path,
+        required=True,
     )
     static_parser.add_argument("model", help="Path to the model", type=Path)
     static_parser.set_defaults(
