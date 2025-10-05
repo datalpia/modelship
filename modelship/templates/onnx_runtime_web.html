@@ -45,13 +45,14 @@
   </main>
 
   <script type="module">
-    import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/esm/ort.min.js"
-    ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/"
+    import * as ort from "./vendor/onnxruntime-web/ort.bundle.min.js"
+    console.info(`onnxruntime-web version: ${ort.env.versions.web}`)
 
     const modelMetadata = {{ model_metadata_json | safe }}
 
     console.info('loading model using onnx runtime web')
-    const session = await ort.InferenceSession.create('{{ model_path }}')
+    const sessionOption = { executionProviders: ['webgpu', 'wasm'] };
+    const session = await ort.InferenceSession.create('{{ model_path }}', sessionOption)
 
     function getTensor(value, inputMetadata) {
       const shape = inputMetadata.shape.map((item, index, arr) => item === null ? 1 : item)

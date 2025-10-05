@@ -63,4 +63,8 @@ def test_static(
     cli.cli()
 
     assert (output_path / "index.html").exists()
+    assert (output_path / "vendor" / "onnxruntime-web" / "ort.bundle.min.js").exists()
+    assert (
+        output_path / "vendor" / "onnxruntime-web" / "ort-wasm-simd-threaded.jsep.wasm"
+    ).exists()
     assert (output_path / "model.onnx").exists()
