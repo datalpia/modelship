@@ -1,3 +1,6 @@
+import shutil
+from pathlib import Path
+
 from invoke import task
 from invoke.context import Context
 
@@ -46,3 +49,41 @@ def test(ctx: Context) -> None:
 @task(audit, vuln, lint, typing, test)
 def qa(ctx: Context):
     pass
+
+
+@task
+def vendor_static_assets(ctx: Context) -> None:
+    base_path = (Path(__file__).parent / "modelship" / "static" / "vendor").absolute()
+
+    node_packages = {
+        "onnxruntime-web": [
+            Path("dist") / "ort.bundle.min.mjs",
+            Path("dist") / "ort-wasm-simd-threaded.jsep.wasm",
+        ]
+    }
+
+    ctx.run("npm install", echo=True, pty=True)
+
+    for package_name, package_files in node_packages.items():
+        print("vendoring package:", package_name)
+        dst = base_path / package_name
+        shutil.rmtree(dst, ignore_errors=True)
+        dst.mkdir(parents=True, exist_ok=True)
+
+        for package_file in package_files:
+            src = Path("node_modules") / package_name / package_file
+            if package_file.suffix in [".js", ".mjs"]:
+                print(f"build {package_name} module: {package_file}")
+                ctx.run(
+                    f"node_modules/.bin/rollup {src} \
+                        -o modelship/static/vendor/{package_name}/{src.with_suffix('.js').name} \
+                        -p @rollup/plugin-node-resolve"
+                )
+            else:
+                src = Path("node_modules") / package_name / package_file
+                if src.is_dir():
+                    print(f"copying: {src} → {dst / src.name}")
+                    shutil.copytree(src, dst / src.name, dirs_exist_ok=True)
+                else:
+                    print(f"copying: {src} → {dst}")
+                    shutil.copy(src, dst)

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Misc
+- vendor static assets for offline usage
+
 ## [0.1.0] - 2025-09-28
 Initial release of `modelship`.
 
