@@ -44,8 +44,16 @@
     </form>
   </main>
 
+  <script type="importmap">
+    {
+      "imports": {
+        "onnxruntime-web": "./vendor/onnxruntime-web/ort.bundle.min.js"
+      }
+    }
+  </script>
+
   <script type="module">
-    import * as ort from "./vendor/onnxruntime-web/ort.bundle.min.js"
+    import * as ort from "onnxruntime-web"
     console.info(`onnxruntime-web version: ${ort.env.versions.web}`)
 
     const modelMetadata = {{ model_metadata_json | safe }}
