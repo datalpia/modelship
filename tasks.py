@@ -77,7 +77,9 @@ def vendor_static_assets(ctx: Context) -> None:
                 ctx.run(
                     f"node_modules/.bin/rollup {src} \
                         -o modelship/static/vendor/{package_name}/{src.with_suffix('.js').name} \
-                        -p @rollup/plugin-node-resolve"
+                        -f es \
+                        -p @rollup/plugin-node-resolve \
+                        -p @rollup/plugin-terser"
                 )
             else:
                 src = Path("node_modules") / package_name / package_file
