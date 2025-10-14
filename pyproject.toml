@@ -28,15 +28,17 @@ classifiers = [
 ]
 dynamic = ["version"]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[project.urls]
+Repository = "https://github.com/datalpia/modelship"
+Issues = "https://github.com/datalpia/modelship/issues"
+Changelog = "https://github.com/datalpia/modelship/blob/main/CHANGELOG.md"
 
 [project.scripts]
 modelship = "modelship.__main__:cli"
 
-[tool.hatch.version]
-path = "modelship/__about__.py"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
@@ -49,3 +51,6 @@ dev = [
     "ruff==0.14.0",
     "types-pyyaml==6.0.12.20250915",
 ]
+
+[tool.hatch.version]
+path = "modelship/__about__.py"
