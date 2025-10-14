@@ -1,56 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html data-bs-theme="dark" data-bs-core="modern">
 <header>
   <title>{{ model_metadata.name }} | modelship</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <link href="./vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="./vendor/halfmoon/halfmoon.min.css" rel="stylesheet">
+  <link href="./vendor/halfmoon/halfmoon.modern.css" rel="stylesheet">
 </header>
 
 <body>
   <main class="container">
-    <h1>{{ model_metadata.name }}</h1>
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-4">
+        <h1>{{ model_metadata.name }}</h1>
 
-    {% if model_metadata.description %}
-    <p>{{ model_metadata.description }}</p>
-    {% endif %}
+        {% if model_metadata.description %}
+        <p>{{ model_metadata.description }}</p>
+        {% endif %}
 
-    <h2>Inputs</h2>
-    <form id="inferenceForm">
-      {% for model_input_key, model_input in model_metadata.inputs.items() %}
-      <label for="{{ model_input_key }}Input">{{ model_input.name }}</label>
-      <input
-        id="{{ model_input_key }}Input"
-        type="{% if model_input.type == 'float32' %}number{% else %}text{% endif %}"
-        {% if model_input.min %}min="{{ model_input.min }}"{% endif %}
-        {% if model_input.max %}max="{{ model_input.max }}"{% endif %}
-        {% if model_input.step %}step="{{ model_input.step }}"{% endif %}
-        {% if model_input.default %}value="{{ model_input.default }}"{%endif %}
-      >
-      {% endfor %}
-      <input type="submit" value="Run">
-    </form>
+        <h2>Inputs</h2>
+        <form id="inferenceForm">
+          {% for model_input_key, model_input in model_metadata.inputs.items() %}
+          <div class="mb-3">
+            <label for="{{ model_input_key }}Input" class="form-label">{{ model_input.name }}</label>
+            <input
+              id="{{ model_input_key }}Input"
+              type="{% if model_input.type == 'float32' %}number{% else %}text{% endif %}"
+              class="form-control"
+              {% if model_input.min %}min="{{ model_input.min }}"{% endif %}
+              {% if model_input.max %}max="{{ model_input.max }}"{% endif %}
+              {% if model_input.step %}step="{{ model_input.step }}"{% endif %}
+              {% if model_input.default %}value="{{ model_input.default }}"{%endif %}
+            >
+          </div>
+          {% endfor %}
+          <div class="d-flex align-items-center">
+            <input type="submit" class="btn btn-primary ms-auto" value="Run">
+          </div>
+        </form>
 
-    <h2>Outputs</h2>
-    <form id="resultsForm">
-      {% for model_output_key, model_output in model_metadata.outputs.items() %}
-      <label for="{{ model_output_key }}Output">{{ model_output.name }}</label>
-      <input
-        id="{{ model_output_key }}Output"
-        type="{% if model_output.type == 'float32' %}number{% else %}text{% endif %}"
-        disabled
-      >
-      {% endfor %}
-    </form>
+        <h2>Outputs</h2>
+        <form id="resultsForm">
+          {% for model_output_key, model_output in model_metadata.outputs.items() %}
+          <div class="mb-3">
+            <label for="{{ model_output_key }}Output" class="form-label">{{ model_output.name }}</label>
+            <input
+              id="{{ model_output_key }}Output"
+              type="{% if model_output.type == 'float32' %}number{% else %}text{% endif %}"
+              class="form-control"
+              disabled
+            >
+          </div>
+          {% endfor %}
+        </form>
+      </div>
+    </div>
   </main>
 
   <script type="importmap">
     {
       "imports": {
+        "bootstrap": "./vendor/bootstrap/bootstrap.esm.min.js",
         "onnxruntime-web": "./vendor/onnxruntime-web/ort.bundle.min.js"
       }
     }
   </script>
+
+  <!--
+  <script type="module">
+    import * as bootstrap from "bootstrap"
+  </script>
+  -->
 
   <script type="module">
     import * as ort from "onnxruntime-web"

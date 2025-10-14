@@ -56,10 +56,19 @@ def vendor_static_assets(ctx: Context) -> None:
     base_path = (Path(__file__).parent / "modelship" / "static" / "vendor").absolute()
 
     node_packages = {
+        "bootstrap": [Path("dist") / "js" / "bootstrap.esm.min.js"],
+        "bootstrap-icons": [
+            Path("font") / "bootstrap-icons.min.css",
+            Path("font") / "fonts",
+        ],
+        "halfmoon": [
+            Path("css") / "halfmoon.min.css",
+            Path("css") / "cores" / "halfmoon.modern.css",
+        ],
         "onnxruntime-web": [
             Path("dist") / "ort.bundle.min.mjs",
             Path("dist") / "ort-wasm-simd-threaded.jsep.wasm",
-        ]
+        ],
     }
 
     ctx.run("npm install", echo=True, pty=True)
