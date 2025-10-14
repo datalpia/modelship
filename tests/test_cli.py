@@ -62,9 +62,17 @@ def test_static(
 
     cli.cli()
 
-    assert (output_path / "index.html").exists()
-    assert (output_path / "vendor" / "onnxruntime-web" / "ort.bundle.min.js").exists()
-    assert (
-        output_path / "vendor" / "onnxruntime-web" / "ort-wasm-simd-threaded.jsep.wasm"
-    ).exists()
-    assert (output_path / "model.onnx").exists()
+    expected_assets = [
+        Path("index.html"),
+        Path("model.onnx"),
+        Path("vendor") / "bootstrap" / "bootstrap.esm.min.js",
+        Path("vendor") / "bootstrap-icons" / "bootstrap-icons.min.css",
+        Path("vendor") / "bootstrap-icons" / "fonts" / "bootstrap-icons.woff",
+        Path("vendor") / "bootstrap-icons" / "fonts" / "bootstrap-icons.woff2",
+        Path("vendor") / "halfmoon" / "halfmoon.min.css",
+        Path("vendor") / "halfmoon" / "halfmoon.modern.css",
+        Path("vendor") / "onnxruntime-web" / "ort-wasm-simd-threaded.jsep.wasm",
+        Path("vendor") / "onnxruntime-web" / "ort.bundle.min.js",
+    ]
+    for asset_path in expected_assets:
+        assert (output_path / asset_path).exists()
