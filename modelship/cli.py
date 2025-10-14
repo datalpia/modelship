@@ -1,5 +1,6 @@
 import argparse
 import shutil
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
@@ -7,7 +8,7 @@ import jinja2
 import pydantic
 import yaml
 
-from modelship.__about__ import __version__
+from modelship import __about__
 
 
 ModelIOType = Literal["float32", "string"]
@@ -36,6 +37,13 @@ class ModelMetadata(pydantic.BaseModel):
     outputs: dict[str, ModelOutputMetadata]
 
 
+@dataclass(frozen=True)
+class AppMetadata:
+    app_name: str
+    app_version: str
+    github_repo_url: str
+
+
 def generate_static_app(
     model_path: Path, metadata_path: Path, output_path: Path
 ) -> None:
@@ -60,6 +68,11 @@ def generate_static_app(
     )
     template = jinja_env.get_template("onnx_runtime_web.html")
     rendered_template = template.render(
+        app_metadata=AppMetadata(
+            app_name="🚢 Modelship",
+            app_version=__about__.__version__,
+            github_repo_url="https://github.com/datalpia/modelship",
+        ),
         model_path=output_model_name,
         model_metadata=model_metadata,
         model_metadata_json=model_metadata.model_dump_json(),
@@ -79,7 +92,7 @@ def cli() -> None:
     parser = argparse.ArgumentParser(
         "modelship", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument("--version", action="version", version=__version__)
+    parser.add_argument("--version", action="version", version=__about__.__version__)
     subparsers = parser.add_subparsers(title="commands", required=True)
 
     static_parser = subparsers.add_parser(

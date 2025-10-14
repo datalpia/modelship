@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html data-bs-theme="dark" data-bs-core="modern">
-<header>
+<head>
   <title>{{ model_metadata.name }} | modelship</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="./vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
   <link href="./vendor/halfmoon/halfmoon.min.css" rel="stylesheet">
   <link href="./vendor/halfmoon/halfmoon.modern.css" rel="stylesheet">
-</header>
+</head>
 
-<body>
-  <main class="container">
+<body class="d-flex flex-column min-vh-100">
+  <main class="container py-3 py-sm-4 px-3 px-sm-4 flex-grow-1">
     <div class="row justify-content-center">
-      <div class="col-12 col-md-8 col-lg-4">
+      <div class="col-12 col-md-8 col-lg-6">
         <h1>{{ model_metadata.name }}</h1>
 
         {% if model_metadata.description %}
@@ -57,6 +57,27 @@
       </div>
     </div>
   </main>
+
+  <footer class="mt-auto py-3 border-top" style="background-color: var(--bs-secondary-bg);">
+    <div class="container">
+      <div class="text-center">
+        <small class="text-muted">
+          Generated with
+          <a href="{{ app_metadata.github_repo_url }}"
+              target="_blank"
+              class="text-muted text-decoration-none">
+            {{ app_metadata.app_name }}
+          </a>
+          <a href="{{ app_metadata.github_repo_url }}/releases/tag/{{ app_metadata.app_version }}"
+              target="_blank"
+              class="text-muted text-decoration-none">
+            v{{ app_metadata.app_version }}
+            <i class="bi-box-arrow-up-right ms-1" style="font-size: 0.8em; vertical-align: text-top;"></i>
+          </a>
+        </small>
+      </div>
+    </div>
+  </footer>
 
   <script type="importmap">
     {
