@@ -19,41 +19,50 @@
         <p>{{ model_metadata.description }}</p>
         {% endif %}
 
-        <h2>Inputs</h2>
-        <form id="inferenceForm">
-          {% for model_input_key, model_input in model_metadata.inputs.items() %}
-          <div class="mb-3">
-            <label for="{{ model_input_key }}Input" class="form-label">{{ model_input.name }}</label>
-            <input
-              id="{{ model_input_key }}Input"
-              type="{% if model_input.type == 'float32' %}number{% else %}text{% endif %}"
-              class="form-control"
-              {% if model_input.min %}min="{{ model_input.min }}"{% endif %}
-              {% if model_input.max %}max="{{ model_input.max }}"{% endif %}
-              {% if model_input.step %}step="{{ model_input.step }}"{% endif %}
-              {% if model_input.default %}value="{{ model_input.default }}"{%endif %}
-            >
+        <div id="modelLoadingIndicator" class="text-center my-5">
+          <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
           </div>
-          {% endfor %}
-          <div class="d-flex align-items-center">
-            <input type="submit" class="btn btn-primary ms-auto" value="Run">
-          </div>
-        </form>
+          <p class="text-muted">Loading ONNX model...</p>
+        </div>
 
-        <h2>Outputs</h2>
-        <form id="resultsForm">
-          {% for model_output_key, model_output in model_metadata.outputs.items() %}
-          <div class="mb-3">
-            <label for="{{ model_output_key }}Output" class="form-label">{{ model_output.name }}</label>
-            <input
-              id="{{ model_output_key }}Output"
-              type="{% if model_output.type == 'float32' %}number{% else %}text{% endif %}"
-              class="form-control"
-              disabled
-            >
-          </div>
-          {% endfor %}
-        </form>
+        <div id="modelInterface" style="display: none;">
+          <h2>Inputs</h2>
+          <form id="inferenceForm">
+            {% for model_input_key, model_input in model_metadata.inputs.items() %}
+            <div class="mb-3">
+              <label for="{{ model_input_key }}Input" class="form-label">{{ model_input.name }}</label>
+              <input
+                id="{{ model_input_key }}Input"
+                type="{% if model_input.type == 'float32' %}number{% else %}text{% endif %}"
+                class="form-control"
+                {% if model_input.min %}min="{{ model_input.min }}"{% endif %}
+                {% if model_input.max %}max="{{ model_input.max }}"{% endif %}
+                {% if model_input.step %}step="{{ model_input.step }}"{% endif %}
+                {% if model_input.default %}value="{{ model_input.default }}"{%endif %}
+              >
+            </div>
+            {% endfor %}
+            <div class="d-flex align-items-center">
+              <input type="submit" class="btn btn-primary ms-auto" value="Run">
+            </div>
+          </form>
+
+          <h2>Outputs</h2>
+          <form id="resultsForm">
+            {% for model_output_key, model_output in model_metadata.outputs.items() %}
+            <div class="mb-3">
+              <label for="{{ model_output_key }}Output" class="form-label">{{ model_output.name }}</label>
+              <input
+                id="{{ model_output_key }}Output"
+                type="{% if model_output.type == 'float32' %}number{% else %}text{% endif %}"
+                class="form-control"
+                disabled
+              >
+            </div>
+            {% endfor %}
+          </form>
+        </div>
       </div>
     </div>
   </main>
@@ -102,7 +111,29 @@
 
     console.info('loading model using onnx runtime web')
     const sessionOption = { executionProviders: ['webgpu', 'wasm'] };
-    const session = await ort.InferenceSession.create('{{ model_path }}', sessionOption)
+
+    let session;
+    try {
+      session = await ort.InferenceSession.create('{{ model_path }}', sessionOption)
+
+      document.getElementById('modelLoadingIndicator').style.display = 'none'
+      document.getElementById('modelInterface').style.display = 'block'
+
+      console.info('model loaded successfully')
+    } catch (error) {
+      console.error('failed to load ONNX model:', error)
+
+      const loadingIndicator = document.getElementById('modelLoadingIndicator')
+      const errorMessage = error.message || String(error)
+      loadingIndicator.innerHTML = `
+        <div class="alert alert-danger" role="alert">
+          <h4 class="alert-heading"><i class="bi-exclamation-triangle"></i> Failed to load model</h4>
+          <p class="mb-0">An error occurred while loading the ONNX model.</p>
+          <pre class="mt-3 mb-0 p-3 bg-body-secondary border rounded"><code>${errorMessage}</code></pre>
+        </div>
+      `
+      throw error
+    }
 
     function getTensor(value, inputMetadata) {
       const shape = inputMetadata.shape.map((item, index, arr) => item === null ? 1 : item)

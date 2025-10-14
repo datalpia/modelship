@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- model loading indicator for static web application
 - footer app credit for static web application
 
 ### Changed
