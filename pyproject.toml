@@ -6,6 +6,7 @@ license = { text = "Apache-2.0" }
 requires-python = ">=3.10,<3.14"
 dependencies = [
     "jinja2>=3",
+    "onnx>=1",
     "onnxruntime>=1",
     "pydantic>=2",
     "pyyaml>=6",
@@ -49,8 +50,13 @@ dev = [
     "pytest==8.4.2",
     "pytest-cov==7.0.0",
     "ruff==0.14.0",
+    "types-protobuf==6.32.1.20250918",
     "types-pyyaml==6.0.12.20250915",
 ]
 
 [tool.hatch.version]
 path = "modelship/__about__.py"
+
+[[tool.mypy.overrides]]
+module = ["onnxruntime.*"]
+ignore_missing_imports = true

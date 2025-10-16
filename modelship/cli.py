@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Literal
 
 import jinja2
+import onnxruntime as ort
 import pydantic
 import yaml
 
@@ -42,6 +43,37 @@ class AppMetadata:
     app_name: str
     app_version: str
     github_repo_url: str
+
+
+def inspect_model(model_path: Path) -> None:
+    import onnx
+    from google.protobuf.json_format import MessageToDict
+
+    model_proto = onnx.load(model_path)
+    model_metadata = MessageToDict(model_proto)
+
+    print(model_metadata)
+
+    session = ort.InferenceSession(str(model_path))
+    metadata = session.get_modelmeta()
+
+    print("Model file:", model_path)
+
+    print("Metadata:")
+    print("  description:", metadata.description)
+    print("  domain:", metadata.domain)
+    print("  version:", metadata.version)
+    print("  producer name:", metadata.producer_name)
+    print("  graph name:", metadata.graph_name)
+    print("  graph description:", metadata.graph_description)
+
+    print("Inputs:")
+    for input_meta in session.get_inputs():
+        print(f"  {input_meta.name}: type={input_meta.type}, shape={input_meta.shape}")
+
+    print("Outputs:")
+    for output_meta in session.get_outputs():
+        print(f"  {output_meta.name}: type={output_meta.type}, shape={output_meta.shape}")
 
 
 def generate_static_app(
@@ -94,6 +126,14 @@ def cli() -> None:
     )
     parser.add_argument("--version", action="version", version=__about__.__version__)
     subparsers = parser.add_subparsers(title="commands", required=True)
+
+    inspect_parser = subparsers.add_parser(
+        "inspect", help="Inspect a model for metadata and I/O", add_help=True
+    )
+    inspect_parser.add_argument("model", help="Path to the model", type=Path)
+    inspect_parser.set_defaults(
+        func=lambda x: inspect_model(x.model)
+    )
 
     static_parser = subparsers.add_parser(
         "static", help="Generate a static web application", add_help=True

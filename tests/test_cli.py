@@ -38,6 +38,27 @@ def test_version(
     assert __version__ in output
 
 
+def test_inspect(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], onnx_model: Path, metadata: Path) -> None:
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            CLI_NAME,
+            "inspect",
+            str(onnx_model.absolute()),
+        ],
+    )
+
+    cli.cli()
+
+    captured = capsys.readouterr()
+    output = captured.out
+    assert f"Model file: {onnx_model}" in output
+    assert "Metadata:" in output
+    assert "Inputs:" in output
+    assert "Outputs:" in output
+
+
 def test_static(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
