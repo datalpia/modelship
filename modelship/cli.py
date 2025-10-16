@@ -80,11 +80,7 @@ def generate_static_app(
 
     output_path.mkdir(parents=True, exist_ok=True)
     (output_path / "index.html").write_text(rendered_template)
-    shutil.copytree(
-        Path(__file__).parent / "static" / "vendor",
-        output_path / "vendor",
-        dirs_exist_ok=True,
-    )
+    shutil.copytree(Path(__file__).parent / "static", output_path, dirs_exist_ok=True)
     shutil.copyfile(model_path, output_path / output_model_name)
 
 

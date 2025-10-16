@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- defer onnxruntime-web operations to dedicated worker
+
 ## [0.2.0] - 2025-10-15
 ### Added
 - model loading indicator for static web application

@@ -104,83 +104,63 @@
   -->
 
   <script type="module">
-    import * as ort from "onnxruntime-web"
-    console.info(`onnxruntime-web version: ${ort.env.versions.web}`)
-
     const modelMetadata = {{ model_metadata_json | safe }}
 
-    console.info('loading model using onnx runtime web')
-    const sessionOption = { executionProviders: ['webgpu', 'wasm'] };
+    console.log('[main] init worker')
+    const worker = new Worker('./ortworker.js', { type: 'module' })
 
-    let session;
-    try {
-      session = await ort.InferenceSession.create('{{ model_path }}', sessionOption)
+    worker.onmessage = function(e) {
+      const { type, outputs, error } = e.data
 
-      document.getElementById('modelLoadingIndicator').style.display = 'none'
-      document.getElementById('modelInterface').style.display = 'block'
+      switch (type) {
+        case 'ready':
+          console.info('[main] loading model')
+          worker.postMessage({ type: 'load', payload: { modelPath: '{{ model_path }}' } })
+          break
 
-      console.info('model loaded successfully')
-    } catch (error) {
-      console.error('failed to load ONNX model:', error)
+        case 'load-success':
+          console.info('[main] model loaded successfully')
+          document.getElementById('modelLoadingIndicator').style.display = 'none'
+          document.getElementById('modelInterface').style.display = 'block'
+          break
 
-      const loadingIndicator = document.getElementById('modelLoadingIndicator')
-      const errorMessage = error.message || String(error)
-      loadingIndicator.innerHTML = `
-        <div class="alert alert-danger" role="alert">
-          <h4 class="alert-heading"><i class="bi-exclamation-triangle"></i> Failed to load model</h4>
-          <p class="mb-0">An error occurred while loading the ONNX model.</p>
-          <pre class="mt-3 mb-0 p-3 bg-body-secondary border rounded"><code>${errorMessage}</code></pre>
-        </div>
-      `
-      throw error
-    }
+        case 'load-error':
+          console.error('[main] failed to load ONNX model:', error)
+          const loadingIndicator = document.getElementById('modelLoadingIndicator')
+          loadingIndicator.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+              <h4 class="alert-heading"><i class="bi-exclamation-triangle"></i> Failed to load model</h4>
+              <p class="mb-0">An error occurred while loading the ONNX model.</p>
+              <pre class="mt-3 mb-0 p-3 bg-body-secondary border rounded"><code>${error}</code></pre>
+            </div>
+          `
+          break
 
-    function getTensor(value, inputMetadata) {
-      const shape = inputMetadata.shape.map((item, index, arr) => item === null ? 1 : item)
-      const array = (inputMetadata.type === 'float32') ? Float32Array.from([value]) : [value]
-      return new ort.Tensor(inputMetadata.type, array, shape)
-    }
+        case 'predict-success':
+          console.info('[main] model prediction successful')
+          {% for model_output_key in model_metadata.outputs.keys() %}
+          document.getElementById('{{ model_output_key }}Output').value = outputs.{{ model_output_key }}
+          {% endfor %}
+          break
 
-    async function performModelInference(inputs) {
-      try {
-        const inputTensors = Object.fromEntries(
-          Object.entries(inputs).map(
-            ([key, value]) => [key, getTensor(value, modelMetadata.inputs[key])]
-          )
-        )
-
-        const results = await session.run(inputTensors)
-        console.debug(`'results': ${JSON.stringify(results, null, 4)}`)
-
-        return Object.fromEntries(
-          Object.entries(results).map(([key, value]) => [key, value.data])
-        )
-      } catch (e) {
-        console.error(`failed to inference ONNX model: ${e}.`)
+        case 'predict-error':
+          console.error(`[main] failed to perform model prediction: ${error}`)
+          break
       }
     }
 
-    function main() {
-      document.getElementById('inferenceForm').addEventListener('submit', async event => {
-        event.preventDefault()
+    document.getElementById('inferenceForm').addEventListener('submit', async event => {
+      event.preventDefault()
 
-        const formInputs = {
-          {% for model_input_key, model_input in model_metadata.inputs.items() %}
-          {{ model_input_key }}: document.getElementById('{{ model_input_key}}Input').value,
-          {% endfor %}
-        }
-
-        console.debug(`performing model inference with inputs: ${JSON.stringify(formInputs, null, 4)}`)
-        const formOutputs = await performModelInference(formInputs)
-        console.debug(`output model predictions: ${JSON.stringify(formOutputs, null, 4)}`)
-
-        {% for model_output_key in model_metadata.outputs.keys() %}
-        document.getElementById('{{ model_output_key }}Output').value = formOutputs.{{ model_output_key }}
+      const formInputs = {
+        {% for model_input_key, model_input in model_metadata.inputs.items() %}
+        {{ model_input_key }}: document.getElementById('{{ model_input_key}}Input').value,
         {% endfor %}
-      })
-    }
+      }
 
-    main()
+      console.info('[main] perform model prediction')
+      worker.postMessage({ type: 'predict', payload: { inputs: formInputs, modelMetadata } })
+    })
   </script>
 </body>
 
