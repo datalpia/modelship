@@ -12,7 +12,7 @@ self.postMessage = (msg) => {
 // permanent onnx runtime inference session
 let session
 
-async function init(modelPath) {
+async function load(modelPath) {
   const sessionOption = { executionProviders: ['webgpu', 'wasm'] }
   console.debug(`[worker] initializing onnxruntime-web inference session`)
   console.debug(`[worker]   model path: ${modelPath}`)
@@ -50,7 +50,7 @@ self.onmessage = async function (e) {
   switch (type) {
     case 'load':
       try {
-        await init(payload.modelPath)
+        await load(payload.modelPath)
         self.postMessage({ type: 'load-success' })
       } catch (error) {
         self.postMessage({ type: 'load-error', error: error.message || String(error) })
