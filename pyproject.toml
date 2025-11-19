@@ -16,18 +16,23 @@ dependencies = [
 keywords = ["machine-learning", "deployment", "webassembly", "onnx"]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
+    "Environment :: WebAssembly",
+    "Framework :: Pydantic",
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Other Audience",
     "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: JavaScript",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development",
     "Topic :: Utilities",
+    "Typing :: Typed",
 ]
 dynamic = ["version"]
 
