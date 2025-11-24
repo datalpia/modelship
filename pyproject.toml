@@ -50,7 +50,7 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "bandit==1.9.1",
+    "bandit==1.9.2",
     "invoke==2.2.1",
     "mypy==1.18.2",
     "pip-audit==2.9.0",
