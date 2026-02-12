@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add missing authors section in `pyproject.toml`
 - update classifiers in pyproject.toml
 
+### Changed
+- add support for python 3.14
+
 ## [0.2.1] - 2025-10-16
 ### Fixed
 - defer onnxruntime-web operations to dedicated worker
