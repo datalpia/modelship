@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - add support for python 3.14
+- `onnxruntime` limited to 1.23 for intel mac or python 3.10
 
 ## [0.2.1] - 2025-10-16
 ### Fixed
