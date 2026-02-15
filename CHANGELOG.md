@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-02-15
+This minor release fixes the previous one by relaxing the `onnxruntime` version constraint for non-Intel Mac environments running on Python 3.11+.
+
 ### Changed
 - remove constraints on `onnxruntime` for non-Intel Mac environments running on Python 3.11+
 
@@ -46,7 +49,8 @@ Initial release of `modelship`.
 ### Added
 - `modelship static` to generate a static web application from an ONNX model
 
-[Unreleased]: https://github.com/datalpia/modelship/compare/0.2.2...HEAD
+[Unreleased]: https://github.com/datalpia/modelship/compare/0.2.3...HEAD
+[0.2.3]: https://github.com/datalpia/modelship/compare/0.2.2...0.2.3
 [0.2.2]: https://github.com/datalpia/modelship/compare/0.2.1...0.2.2
 [0.2.1]: https://github.com/datalpia/modelship/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/datalpia/modelship/compare/0.1.0...0.2.0
