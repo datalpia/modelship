@@ -629,8 +629,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "jinja2", specifier = ">=3" },
+    { name = "onnxruntime", specifier = ">=1" },
     { name = "onnxruntime", marker = "(python_full_version == '3.10.*' and platform_machine != 'x86_64') or (python_full_version == '3.10.*' and sys_platform != 'darwin') or (platform_machine == 'x86_64' and sys_platform == 'darwin')", specifier = ">=1,<1.24" },
-    { name = "onnxruntime", marker = "(python_full_version >= '3.11' and platform_machine != 'x86_64') or (python_full_version >= '3.11' and sys_platform != 'darwin')", specifier = ">=1.24" },
     { name = "pydantic", specifier = ">=2" },
     { name = "pyyaml", specifier = ">=6" },
 ]

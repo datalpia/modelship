@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- remove constraints on `onnxruntime` for non-Intel Mac environments running on Python 3.11+
+
 ## [0.2.2] - 2026-02-15
 This minor release ensures compatibility with Python 3.10 to 3.14 and Intel Macs
 with latest ONNX Runtime dropping support for both Python 3.10 and Intel Macs.
