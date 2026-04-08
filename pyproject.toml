@@ -59,7 +59,7 @@ dev = [
     "pytest==9.0.2",
     "pytest-cov==7.1.0",
     "ruff==0.15.7",
-    "types-pyyaml==6.0.12.20250915",
+    "types-pyyaml==6.0.12.20260408",
 ]
 
 [tool.hatch.version]
