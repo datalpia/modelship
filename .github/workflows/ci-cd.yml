@@ -258,7 +258,7 @@ jobs:
           uv run modelship static --output dist/demo/housing --metadata demo/housing/metadata.yml demo/housing/model.onnx
           uv run modelship static --output dist/demo/sentiment --metadata demo/sentiment/metadata.yml demo/sentiment/model.onnx
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
