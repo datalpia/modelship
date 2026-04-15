@@ -54,7 +54,7 @@ build-backend = "hatchling.build"
 dev = [
     "bandit==1.9.4",
     "invoke==2.2.1",
-    "mypy==1.19.1",
+    "mypy==1.20.1",
     "pip-audit==2.10.0",
     "pytest==9.0.3",
     "pytest-cov==7.1.0",
