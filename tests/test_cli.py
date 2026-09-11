@@ -5,7 +5,6 @@ import pytest
 
 from modelship import cli
 
-
 CLI_NAME = "modelship"
 
 

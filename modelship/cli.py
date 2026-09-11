@@ -10,7 +10,6 @@ import yaml
 
 from modelship import __about__
 
-
 ModelIOType = Literal["float32", "string"]
 
 
